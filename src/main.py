@@ -17,25 +17,31 @@ print(client.list_database_names())
 
 
 def add_files_to_db(files_paths:list[tuple[str, str]]):
-    # options
-        # store loose files
-        # store files within their directory in db (directory based collections)
-            # no benefit, we use tags based search
-                # makes stuff easier to track?
-                # 
-            # to what extent
-                # is each subdir a new table?
-                    # surely we can string manip to get all files in some directory after the fact, hence store loose files
-                    # it's a tag based search as well, we'd prefer to store all data in one table rather than iterate over each for simplicity's sake
-
     for file, path in files_paths:
-        # if file exists ------------------
-        dict = {'_id': file, 'path':path, 'tags':{}}
         
-        # write to db
-        # take all files that meet specified types
-        # imgCol.insert_one()
-        # track progress somehow on inserts 
+        dict = {'_id': file, 'path':path,
+                'tags':{'Artist': {}, 'Copyright': {}, 'Character': {}, 'General': {}, 'Meta':{}}}
+        
+        try:
+            x = imgCol.insert_one(dict)
+            print(x)
+        except Exception as e:
+            match type(e).__name__:
+                case 'DuplicateKeyError':
+                    # if file is already in db --------------------------------
+                    # query user on which version of file they want to keep
+                        # and if they want to repeat their choice on other instances of same error
+                    
+                    print(type(e).__name__)
+                    pass
+                case _:
+                    print(f"New unhandled error: {type(e).__name__}")
+            
+            # write any terminal/console output to some log
+                # print(e)
+        
+
+        # track progress somehow on inserts -----------------------------------
             # display to user
             # we should get all files and then add to db if this is case
 
@@ -68,8 +74,7 @@ def get_files_paths(dir:str, subdirs:bool):
     return files_paths
     # this can be used to display files and dirs to user in ui later
 
-files_paths = get_files_paths(dir=directory, subdirs=True)
+# files_paths = get_files_paths(dir=directory, subdirs=True)
+files_paths = get_files_paths(dir=directory+'/test', subdirs=True)
+add_files_to_db(files_paths)
 print(len(files_paths))
-
-# for x in files_paths:
-#     if x[1] == 'E:/Downloads/ref/bell': print(x)
