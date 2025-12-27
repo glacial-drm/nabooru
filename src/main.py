@@ -4,7 +4,7 @@ from pymongo import MongoClient
 import PIL.Image
 
 # add stuff to db
-directory = 'E:/Downloads/ref'
+directory = "placeholder"
 
 # keep in file, make function in taskbar to configure... config file?
 supported_filetypes = ['gif', 'jpeg', 'jpg', 'png', 'webp', 'mp4', 'webm']
