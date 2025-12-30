@@ -1,0 +1,1 @@
+# splashpage that displays current total like some other boorus
