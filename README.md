@@ -1,13 +1,13 @@
-Currently literally justa dumping ground for design decisions
-Will be updated eventually...........
-
-    # options
-        # store loose files
-        # store files within their directory in db (directory based collections)
-            # no benefit, we use tags based search
-                # makes stuff easier to track?
-                # 
-            # to what extent
-                # is each subdir a new table?
-                    # surely we can string manip to get all files in some directory after the fact, hence store loose files
-                    # it's a tag based search as well, we'd prefer to store all data in one table rather than iterate over each for simplicity's sake
+# Plans
+- Image grid rotation/navigation (arrows and numbers for pages) <- currently here
+- distinguishing animated media (video/gifs), display thumbnail of first/relevant frame
+    - relevant frame would be some naive algo
+- tag-based search
+- image focus page (individual image)
+- updating image tags
+- commenting
+    - image board integration (hf)
+- user-grouped images (separate from tags for multi-panel/page stuff)
+- category based search (tag categories such as meta/artist/etc...)
+- UI resizing after the fact
+- themes
