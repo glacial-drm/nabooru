@@ -38,7 +38,10 @@ class FileDB:
     def get_db_filepaths(self):
         file_list = []
         for file in self.imgCollection.find():
-            file_list.append(file['path']+'/'+file['_id'])
+            path:str
+            path = file['path']
+            if "Navia" in path:
+                file_list.append(file['path']+'/'+file['_id'])
         return file_list
 
     def add_files_paths_to_db(self, files_paths:list[tuple[str, str]]):

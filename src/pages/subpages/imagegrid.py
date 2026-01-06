@@ -62,26 +62,22 @@ class ImageGrid(QWidget):
     
 
     def update_image_grid(self, new_page_index:int):
+        # image grid navigation can't be out of index range
+            # grey out buttons if they can't be activated
+
         # ignore new_page_index if shift is impossible (current pos is either end of array)
             # flag and display this to the user somehow using colour
-        
 
+        
         # take new image position based on the page number the user clicked, or left/right (-index, +index)
             # using a new_page_index int
                 #  0 reserved for first page, -1 for last page
         
-        grid_indexer = self.x_grid*self.y_grid
-
-        if new_page_index != -1: # case 0-n
-            # update page index to be 24*n
-                # is n a legal update?
-
-            self.current_page_index = new_page_index
-            # current_file_index = () *
-        else:
-            self.current_page_index
-
-        self.create_image_grid(self.file_paths[self.current_page_index:])
+        self.current_page_index = new_page_index
+        file_path_indexer = self.current_page_index * (self.x_grid*self.y_grid)
+        
+        self.clear_image_grid()
+        self.create_image_grid(self.file_paths[file_path_indexer:])
     
     def update_grid_navigation(self, new_page_index:int):
         # ignore new_page_index if shift is impossible (current pos is either end of array)
@@ -118,7 +114,8 @@ class ImageGrid(QWidget):
         # start from i = 0 in list
             # what if list len less than row_i*col_i
             # return pos?
-
+    def clear_image_grid(self):
+        pass
 
     def create_grid_navigation(self):
         # navigation arrows and numbers to change grid
@@ -154,6 +151,7 @@ class ImageGrid(QWidget):
         naviagation_bar.addWidget(left_end_button)
 
         left_button = QPushButton('<')
+        left_button.clicked.connect(lambda: self.update_image_grid(self.current_page_index-1))
         naviagation_bar.addWidget(left_button)
         
 
@@ -169,10 +167,14 @@ class ImageGrid(QWidget):
             naviagation_bar.addWidget(QPushButton(i_button))
 
         right_button = QPushButton('>')
+        right_button.clicked.connect(lambda: self.update_image_grid(self.current_page_index+1))
         naviagation_bar.addWidget(right_button)
         
         right_end_button = QPushButton('>>') # button -1
         naviagation_bar.addWidget(right_end_button)
 
         self.layout_.addLayout(naviagation_bar, self.x_grid, 0, 1, self.y_grid)
-        
+    
+    def set_navigation_states(self):
+        # make buttons clickable or not
+        pass
