@@ -159,6 +159,7 @@ class ImageGrid(QWidget):
         
         # Grid first page
         left_end_button = QPushButton(str(1)) # button 0
+        left_button.clicked.connect(lambda: self.update_image_grid(self.current_page_index-1))
         naviagation_bar.addWidget(left_end_button)
 
         # button array range (number of pages to navigate between)
@@ -181,3 +182,6 @@ class ImageGrid(QWidget):
 
         self.layout_.addLayout(naviagation_bar, self.x_grid, 0, 1, self.y_grid)
     
+    def add_navigation_button(self, text:str, ):
+        ''''''
+        pass
