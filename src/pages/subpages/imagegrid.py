@@ -73,6 +73,10 @@ class ImageGrid(QWidget):
             # using a new_page_index int
                 #  0 reserved for first page, -1 for last page
         
+        if new_page_index < 0 or new_page_index > self.max_pages:
+            print("New page index out of range")
+            return 
+        
         self.current_page_index = new_page_index
         file_path_indexer = self.current_page_index * (self.x_grid*self.y_grid)
         
@@ -82,6 +86,16 @@ class ImageGrid(QWidget):
     def update_grid_navigation(self, new_page_index:int):
         # ignore new_page_index if shift is impossible (current pos is either end of array)
             # flag and display this to the user somehow using colour
+
+        # navigation bar components include
+            # arrow buttons
+                # 
+            # first/last page buttons
+                #
+            # buttons for other pages
+                # other pages are present based on the length of the passed image list
+            # how many until ... for more pages
+                # standardise to 10
 
         # edit navigation bar in some way
             # change text for buttons
@@ -118,13 +132,6 @@ class ImageGrid(QWidget):
         pass
 
     def create_grid_navigation(self):
-        # navigation arrows and numbers to change grid
-            # arrows are always present
-            # page 1 is always present
-                # other pages are present based on the length of the passed image list
-                # how many until ... for more pages
-                    # standardise to 10
-        
         # implementation
             # < and > buttons
                 # pass new_page_index = current page +/- 1
@@ -140,25 +147,22 @@ class ImageGrid(QWidget):
                 # current page is the central button
                 # 
             
-            # store references to these as they rotate 
-                # naviagation_bar.itemAt().widget()
-                    # means we need to store the result of button_max to index the .itemAt()
             # reassign numbers to buttons when a new button is clicked (no need to store a billion references)
 
         naviagation_bar = QHBoxLayout()
     
-        left_end_button = QPushButton('<<') # button 0
-        naviagation_bar.addWidget(left_end_button)
 
+        # Grid left-shift (show previous page)
         left_button = QPushButton('<')
         left_button.clicked.connect(lambda: self.update_image_grid(self.current_page_index-1))
         naviagation_bar.addWidget(left_button)
         
-
+        # Grid first page
+        left_end_button = QPushButton(str(1)) # button 0
+        naviagation_bar.addWidget(left_end_button)
 
         # button array range (number of pages to navigate between)
             # should be the minimum between the maximium possible number of buttons at a given time (standard is 10) and length of array / (x_grid * y_grid)
-
         button_max = min(10, self.max_pages)
         for i in range(0, button_max):
             
@@ -166,15 +170,14 @@ class ImageGrid(QWidget):
             i_button = str(i+1)
             naviagation_bar.addWidget(QPushButton(i_button))
 
+        # Grid last page
+        right_end_button = QPushButton(str(self.max_pages)) # button -1
+        naviagation_bar.addWidget(right_end_button)
+
+        # Grid right-shift (show next page)
         right_button = QPushButton('>')
         right_button.clicked.connect(lambda: self.update_image_grid(self.current_page_index+1))
         naviagation_bar.addWidget(right_button)
-        
-        right_end_button = QPushButton('>>') # button -1
-        naviagation_bar.addWidget(right_end_button)
 
         self.layout_.addLayout(naviagation_bar, self.x_grid, 0, 1, self.y_grid)
     
-    def set_navigation_states(self):
-        # make buttons clickable or not
-        pass
