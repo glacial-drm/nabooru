@@ -18,11 +18,16 @@ class ImageGrid(QWidget):
         self.file_paths = file_paths
         
         self.current_page_index = 0
-        self.max_pages = ceil(len(file_paths) / (x_grid*y_grid))
-
+        self.total_pages = ceil(len(file_paths) / (x_grid*y_grid))
+        self.max_pages_displayed = 10
         # QGridLayout should contain both image grid and navigation arrows/nums
             # Navigation items should fill the entire last row_i
         self.layout_ = QGridLayout(self) # maybe this doesn't have to be stored, we just set layout and call using built-in layout (non underscore) ---------
+        
+        
+        if self.file_paths == []:
+            # Dialog that gets user to add a new file path
+            pass
         
         # Grid of images 8x3 (default)
         self.create_image_grid(self.file_paths)
@@ -50,7 +55,7 @@ class ImageGrid(QWidget):
         return label
 
     def get_file_pixmap(self, image_path:str):
-        print(image_path)
+        # print(image_path)
         return QPixmap(image_path)
     
     def get_image_path(self):
@@ -72,8 +77,8 @@ class ImageGrid(QWidget):
         # take new image position based on the page number the user clicked, or left/right (-index, +index)
             # using a new_page_index int
                 #  0 reserved for first page, -1 for last page
-        
-        if new_page_index < 0 or new_page_index > self.max_pages:
+        print(new_page_index)
+        if new_page_index < 0 or new_page_index > self.total_pages:
             print("New page index out of range")
             return 
         
@@ -136,9 +141,9 @@ class ImageGrid(QWidget):
             # < and > buttons
                 # pass new_page_index = current page +/- 1
             # first and last buttons
-                # start and end pages (1 and self.max_pages)
+                # start and end pages (1 and self.total_pages)
             # ... labels
-                # if current page > 5 or < max_pages-5
+                # if current page > 5 or < total_pages-5
                     # display corresponding ...
                 # user can still skip to first and last
             # other numbered buttons
@@ -153,35 +158,43 @@ class ImageGrid(QWidget):
     
 
         # Grid left-shift (show previous page)
-        left_button = QPushButton('<')
-        left_button.clicked.connect(lambda: self.update_image_grid(self.current_page_index-1))
-        naviagation_bar.addWidget(left_button)
-        
+        naviagation_bar.addWidget(
+            self.add_navigation_button_shift('<', -1))
         # Grid first page
-        left_end_button = QPushButton(str(1)) # button 0
-        left_button.clicked.connect(lambda: self.update_image_grid(self.current_page_index-1))
-        naviagation_bar.addWidget(left_end_button)
+        naviagation_bar.addWidget(
+                self.add_navigation_button(str(1), 0))
 
         # button array range (number of pages to navigate between)
             # should be the minimum between the maximium possible number of buttons at a given time (standard is 10) and length of array / (x_grid * y_grid)
-        button_max = min(10, self.max_pages)
-        for i in range(0, button_max):
+        button_max = min(self.max_pages_displayed, self.total_pages)
+        for i in range(1, button_max):
             
-            # start from 1 as 0th button is the '<<' button
-            i_button = str(i+1)
-            naviagation_bar.addWidget(QPushButton(i_button))
+            # start from 1 as 0th button is defined
+            i_button = i+1
+            naviagation_bar.addWidget(
+                self.add_navigation_button(str(i_button), i))
+            
 
         # Grid last page
-        right_end_button = QPushButton(str(self.max_pages)) # button -1
-        naviagation_bar.addWidget(right_end_button)
-
+        if button_max > self.max_pages_displayed:
+            naviagation_bar.addWidget(
+                self.add_navigation_button(str(self.total_pages), self.total_pages))
+       
         # Grid right-shift (show next page)
-        right_button = QPushButton('>')
-        right_button.clicked.connect(lambda: self.update_image_grid(self.current_page_index+1))
-        naviagation_bar.addWidget(right_button)
+        naviagation_bar.addWidget(
+            self.add_navigation_button_shift('>', 1))
 
         self.layout_.addLayout(naviagation_bar, self.x_grid, 0, 1, self.y_grid)
     
-    def add_navigation_button(self, text:str, ):
-        ''''''
-        pass
+    def add_navigation_button(self, btn_text:str, page_index:int):
+        '''Function creates and returns a QPushButton that navigates to a specified page index'''
+        btn = QPushButton(btn_text)
+        btn.clicked.connect(lambda: self.update_image_grid(page_index))
+
+        return btn
+    def add_navigation_button_shift(self, btn_text:str, shift:int):
+        '''Function shifts the current_page by a provided "shift" int'''
+        btn = QPushButton(btn_text)
+        btn.clicked.connect(lambda: self.update_image_grid(self.current_page_index+shift))
+
+        return btn
