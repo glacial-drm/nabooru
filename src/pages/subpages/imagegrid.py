@@ -123,46 +123,81 @@ class ImageGrid(QWidget):
                 # not within this scope, buttons values aren't changed if all can be displayed at once
         
         
-        # get current page index
-        # iterate through buttons
-            # adjust pages buttons point to
-                # current page index +- increasing value
-        pages_displayed_midpoint = self.max_var_pages//2
-        if self.current_page_index > pages_displayed_midpoint and self.current_page_index < (self.total_pages - pages_displayed_midpoint):
-            
-            button_max = min(self.max_var_pages, self.total_pages)
-            for i_button in range(0, button_max):
-                
-                new_index = - pages_displayed_midpoint + self.current_page_index + i_button
-                new_btn = 'btn_'+str(i_button)
-                
-                self.navbar_dict[new_btn].setText(str(new_index))
-                self.navbar_dict[new_btn].clicked.disconnect()
-                self.navbar_dict[new_btn] = self.update_navigation_button(self.navbar_dict[new_btn], new_index-1)
-        elif self.current_page_index < pages_displayed_midpoint:
-            # The current default for the navbar
-            # Ensure this state is reachable again
+        # pages_displayed_midpoint: the point at which pages greater should change to being centered and the left ... should be shown
+            # half the number of variable pages
+            # +2 to account for the two buttons either side of the variable buttons
+        pages_displayed_midpoint = (self.max_var_pages//2) + 2
+        
+        # current_button
+            # the button corresponding to the current page
+            # btn n -> page n+1
+        current_button = self.current_page_index + 1
+
+        if current_button <= pages_displayed_midpoint:
+            # uncenter current button, buttons tend to left (no ... on left)
+                # buttons here are close enough, numerically, to button 1, centering them would result in buttons <= 1 being displayed between them and button 1, which is not desired behaviour
+
+            self.reconnect_buttons(btn_index_shift=2) # start from 2 as btn_0 (the first variable button) -> page 2
             pass
-        elif self.current_page_index > (self.total_pages - pages_displayed_midpoint):
+        elif current_button > pages_displayed_midpoint and current_button <= (self.total_pages - pages_displayed_midpoint):
+            # inclusive of the midpoint as it, by default, is the centered page
+                # this means it is reachable when incrementing by 1 from the start page without the need for ...
+                    # e.g. max_var_pages = 9, midpoint = 4
+                    # 
+
+            # center current page
+            self.reconnect_buttons(btn_index_shift = -pages_displayed_midpoint+2 + current_button)
+            pass
+        elif current_button > (self.total_pages - pages_displayed_midpoint):
+            
+            # uncenter current page, pages tend to right (no ... on right)
+            self.reconnect_buttons(btn_index_shift=self.total_pages-self.max_var_pages)
             pass
         else:
             pass
+    
+    def reconnect_buttons(self, btn_index_shift:int):
+        button_max = min(self.max_var_pages, self.total_pages)
+
+        for i_button in range(button_max):
+            
+            btn_key = 'btn_'+str(i_button)
+            new_index = btn_index_shift+i_button
+            
+            self.navbar_dict[btn_key].setText(str(new_index))
+            self.navbar_dict[btn_key].clicked.disconnect()
+            self.navbar_dict[btn_key] = self.update_navigation_button(self.navbar_dict[btn_key], new_index-1)
 
     def update_navigation_ellipses(self):
-        # if current page is more than ellipses_midpoint away from left, or from right
-            # display ...
-        pages_displayed_midpoint = self.max_var_pages//2
-    
-        # Separate ifs as each statement is independent and both can occur in the same check
-        if self.current_page_index > pages_displayed_midpoint:
-            self.navbar_dict['ellipses_start'].show()
-        else:
-            self.navbar_dict['ellipses_start'].hide()    
+        # if current page is:
+            # more than ellipses_midpoint away from left
+                # display left ...
+            # or (total_pages - midpoint) from right
+                # display right ...
         
-        if self.current_page_index < (self.total_pages - pages_displayed_midpoint):
-            self.navbar_dict['ellipses_end'].show()
+        # define midpoint
+            # 1 2 3 4 5 6 7 8 9 n
+                # current case accounts for there being less than n pages, this sections is for there being more than n
+                    # buttons 1 and n are fixed, buttons in between are variable, and can shift in update_navigation_buttons()
+                # the midpoint is the page at which we want ...s to start appearing, according to the comment describing this func
+                    # it is based on max_var_pages, as that determines how many pages away the current page can be before it 
+        pages_displayed_midpoint = (self.max_var_pages//2) + 2 # +2 as buttons start from 2, 
+        
+        # current_button
+            # the button corresponding to the current page
+            # btn n -> page n+1
+        current_button = self.current_page_index + 1
+
+        # Separate ifs as each statement is independent and both can occur in the same check
+        if current_button <= pages_displayed_midpoint:
+            self.navbar_dict['ellipses_start'].hide()
         else:
+            self.navbar_dict['ellipses_start'].show()    
+        
+        if current_button > (self.total_pages - pages_displayed_midpoint):
             self.navbar_dict['ellipses_end'].hide()
+        else:
+            self.navbar_dict['ellipses_end'].show()
     
     def create_image_grid(self, file_paths:list[str]): 
         '''Create a default image grid, displaying the first page (n images) of the image list'''
