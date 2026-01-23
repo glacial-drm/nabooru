@@ -1,4 +1,5 @@
 from math import ceil
+import warnings
 
 from PySide6.QtWidgets import QWidget, QGridLayout, QLabel, QHBoxLayout, QPushButton
 from PySide6.QtGui import QPixmap
@@ -26,13 +27,16 @@ class ImageGrid(QWidget):
             # Navigation items should fill the entire last row_i
         self.layout_ = QGridLayout(self) # maybe this doesn't have to be stored, we just set layout and call using built-in layout (non underscore) ---------
 
-
+        self.navbar_dict = {}
+        self.image_dict = {}
+        self.create_image_dict()
+        
         if self.file_paths == []:
             # Dialog that gets user to add a new file path
             pass
         
         # Grid of images 8x3 (default)
-        self.create_image_grid(self.file_paths)
+        self.create_grid_images(self.file_paths)
 
         # Navigation Arrows / Page Numbers
         self.create_grid_navigation()
@@ -67,7 +71,7 @@ class ImageGrid(QWidget):
     def get_image(self):
         pass
     
-    def update_image_grid(self, new_page_index:int): # wrapper for functions that update the image grid
+    def update_grid_images(self, new_page_index:int): # wrapper for functions that update the image grid
         self.update_grid_page(new_page_index)
         self.update_grid_navigation()
 
@@ -90,8 +94,8 @@ class ImageGrid(QWidget):
         self.current_page_index = new_page_index
         file_path_indexer = self.current_page_index * (self.x_grid*self.y_grid)
         
-        self.clear_image_grid()
-        self.create_image_grid(self.file_paths[file_path_indexer:])
+        # self.clear_grid_images()
+        self.create_grid_images(self.file_paths[file_path_indexer:])
     def update_grid_navigation(self):
         '''Updates the elements of the navigation bar based on the current_page_index'''
         # change text for buttons
@@ -105,7 +109,7 @@ class ImageGrid(QWidget):
         # only display ...s and center page number buttons if we have more pages to display than the max displayed at a given time
         if self.total_pages > self.max_var_pages:
             self.update_navigation_buttons()
-            self.update_navigation_ellipses()
+            self.update_navigation_ellipsis()
 
     def update_navigation_buttons(self):
         # CASES
@@ -136,25 +140,29 @@ class ImageGrid(QWidget):
         if current_button <= pages_displayed_midpoint:
             # uncenter current button, buttons tend to left (no ... on left)
                 # buttons here are close enough, numerically, to button 1, centering them would result in buttons <= 1 being displayed between them and button 1, which is not desired behaviour
+            
+            # inclusive of the midpoint as it, by default, is the page centered in the navigation bar
+                # this means it is reachable when incrementing by 1 from the start page without the need for ... (implying extra pages between 1 and the page following ...)
+                # and that it is the greatest page number for which this is the case
 
             self.reconnect_buttons(btn_index_shift=2) # start from 2 as btn_0 (the first variable button) -> page 2
             pass
         elif current_button > pages_displayed_midpoint and current_button <= (self.total_pages - pages_displayed_midpoint):
-            # inclusive of the midpoint as it, by default, is the centered page
-                # this means it is reachable when incrementing by 1 from the start page without the need for ...
-                    # e.g. max_var_pages = 9, midpoint = 4
-                    # 
-
-            # center current page
-            self.reconnect_buttons(btn_index_shift = -pages_displayed_midpoint+2 + current_button)
-            pass
-        elif current_button > (self.total_pages - pages_displayed_midpoint):
+            # center current button
+                # buttons here are far enough from both button 1 and button n, centering them results in the need for ellipsis on both the left and right 
             
-            # uncenter current page, pages tend to right (no ... on right)
+            # inclusive of (total_pages - midpoint) for the opposite reason the midpoint is inclusive in the first case, as this is from the tail end of the navigation bar buttons
+                # this, by default, would be the last page before a ... isn't required for the tail end of the navigation bar buttons
+            
+            self.reconnect_buttons(btn_index_shift = -pages_displayed_midpoint+2 + current_button)
+        elif current_button > (self.total_pages - pages_displayed_midpoint):
+            # uncenter current button
+                # buttons here are close enough, numerically, to button n, centering them would result in buttons >= n being displayed between them and button n, which is not desired behaviour
+
             self.reconnect_buttons(btn_index_shift=self.total_pages-self.max_var_pages)
             pass
         else:
-            pass
+            warnings.warn("Unexpected behaviour: Button should be out of scope", RuntimeWarning)
     
     def reconnect_buttons(self, btn_index_shift:int):
         button_max = min(self.max_var_pages, self.total_pages)
@@ -168,9 +176,9 @@ class ImageGrid(QWidget):
             self.navbar_dict[btn_key].clicked.disconnect()
             self.navbar_dict[btn_key] = self.update_navigation_button(self.navbar_dict[btn_key], new_index-1)
 
-    def update_navigation_ellipses(self):
+    def update_navigation_ellipsis(self):
         # if current page is:
-            # more than ellipses_midpoint away from left
+            # more than ellipsis_midpoint away from left
                 # display left ...
             # or (total_pages - midpoint) from right
                 # display right ...
@@ -190,16 +198,22 @@ class ImageGrid(QWidget):
 
         # Separate ifs as each statement is independent and both can occur in the same check
         if current_button <= pages_displayed_midpoint:
-            self.navbar_dict['ellipses_start'].hide()
+            self.navbar_dict['ellipsis_start'].hide()
         else:
-            self.navbar_dict['ellipses_start'].show()    
+            self.navbar_dict['ellipsis_start'].show()    
         
         if current_button > (self.total_pages - pages_displayed_midpoint):
-            self.navbar_dict['ellipses_end'].hide()
+            self.navbar_dict['ellipsis_end'].hide()
         else:
-            self.navbar_dict['ellipses_end'].show()
+            self.navbar_dict['ellipsis_end'].show()
     
-    def create_image_grid(self, file_paths:list[str]): 
+    def create_image_dict(self):
+        for row_i in range(self.x_grid):
+            for col_i in range(self.y_grid):
+                key = str(row_i)+str(col_i)
+                self.image_dict[key] = [QPixmap(), QLabel()]
+
+    def create_grid_images(self, file_paths:list[str]): 
         '''Create a default image grid, displaying the first page (n images) of the image list'''
 
         for row_i in range(self.x_grid):
@@ -211,19 +225,30 @@ class ImageGrid(QWidget):
                 if file_list_index >= len(file_paths): # return if no more images    
                     return
                 
-                file_pixmap = self.get_file_pixmap(file_paths[file_list_index]).scaled(self.img_size, self.img_size, QtCore.Qt.KeepAspectRatio)
-                file_label = self.pixmap_to_label(file_pixmap)
+                # file_pixmap = self.get_file_pixmap(file_paths[file_list_index]).scaled(self.img_size, self.img_size, QtCore.Qt.KeepAspectRatio)
+                # file_label = self.pixmap_to_label(file_pixmap)
                 
-                # file_label = QLabel(str(file_list_index))
+                # huge overhead from creating new pixmaps and labels each call (above)
+                    # create them once, then update them here
+                key = str(row_i)+str(col_i)
+                file_label = self.create_pixmap_label(key, file_paths[file_list_index])
 
-                self.layout_.addWidget(file_label, row_i, col_i)
+                self.layout_.addWidget(file_label, row_i, col_i) # move widget adding to constructor for clarity ----
                 
 
         # start from i = 0 in list
             # what if list len less than row_i*col_i
             # return pos?
-    def clear_image_grid(self):
-        pass
+    
+    def create_pixmap_label(self, img_key:str, file_path:str):
+        
+        self.image_dict[img_key][0].load(file_path)
+
+        self.image_dict[img_key][0] = self.image_dict[img_key][0].scaled(self.img_size, self.img_size, QtCore.Qt.KeepAspectRatio)
+        
+        self.image_dict[img_key][1].setPixmap(self.image_dict[img_key][0])
+
+        return self.image_dict[img_key][1]
 
     def create_grid_navigation(self):
         '''Create a default image grid, setting navigation to the first page of the image list'''
@@ -243,7 +268,6 @@ class ImageGrid(QWidget):
                 # 
 
         naviagation_bar = QHBoxLayout()
-        self.navbar_dict = {} # define as empty in constructor -----
 
         # Grid left-shift (show previous page)
         self.navbar_dict['btn_ls'] = self.update_navigation_button_shift(QPushButton('<'), -1)
@@ -253,10 +277,10 @@ class ImageGrid(QWidget):
         self.navbar_dict['btn_start'] = self.update_navigation_button(QPushButton(str(1)), 0)
         naviagation_bar.addWidget(self.navbar_dict['btn_start'])
 
-        # Ellipses (...) after first page
-        self.navbar_dict['ellipses_start'] = QLabel('...')
-        self.navbar_dict['ellipses_start'].hide()
-        naviagation_bar.addWidget(self.navbar_dict['ellipses_start'])
+        # ellipsis (...) after first page
+        self.navbar_dict['ellipsis_start'] = QLabel('...')
+        self.navbar_dict['ellipsis_start'].hide()
+        naviagation_bar.addWidget(self.navbar_dict['ellipsis_start'])
         
         
         # Variable buttons (variable total and change value based on current_page_index)
@@ -269,10 +293,10 @@ class ImageGrid(QWidget):
             self.navbar_dict['btn_'+str(i_button)] = self.update_navigation_button(QPushButton(str(i_button+2)), i_button+1)
             naviagation_bar.addWidget(self.navbar_dict['btn_'+str(i_button)])
             
-        # Ellipses (...) before last page
-        self.navbar_dict['ellipses_end'] = QLabel('...')
-        self.navbar_dict['ellipses_end'].hide()
-        naviagation_bar.addWidget(self.navbar_dict['ellipses_end'])
+        # ellipsis (...) before last page
+        self.navbar_dict['ellipsis_end'] = QLabel('...')
+        self.navbar_dict['ellipsis_end'].hide()
+        naviagation_bar.addWidget(self.navbar_dict['ellipsis_end'])
 
         # Grid last page
         if self.total_pages > button_max:
@@ -283,13 +307,13 @@ class ImageGrid(QWidget):
         self.navbar_dict['btn_rs'] = self.update_navigation_button_shift(QPushButton('>'), 1)
         naviagation_bar.addWidget(self.navbar_dict['btn_rs'])
 
-        self.layout_.addLayout(naviagation_bar, self.x_grid, 0, 1, self.y_grid)
+        self.layout_.addLayout(naviagation_bar, self.x_grid, 0, 1, self.y_grid) # move widget adding (to layout) to constructor for clarity, as we have references ----
      
     def update_navigation_button(self, btn:QPushButton, page_index:int):
         '''Function returns a QPushButton that navigates to a specified page index'''
-        btn.clicked.connect(lambda: self.update_image_grid(page_index))
+        btn.clicked.connect(lambda: self.update_grid_images(page_index))
         return btn
     def update_navigation_button_shift(self, btn:QPushButton, shift:int):
         '''Function returns a QPushButton that shifts the current_page by a provided "shift" int'''
-        btn.clicked.connect(lambda: self.update_image_grid(self.current_page_index+shift))
+        btn.clicked.connect(lambda: self.update_grid_images(self.current_page_index+shift))
         return btn
