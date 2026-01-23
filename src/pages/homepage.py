@@ -37,21 +37,6 @@ class HomePage(QWidget): # contain all the images or contain window that contain
 
         # self.setLayout(self.layout_) # verify how this works (as opposed to passing self into widget constructor)
 
-
-        # old / Dummy
-        # self.image = QLabel('img')
-        # pixmap = QPixmap(dir+'/'+dir_list[5]).scaled(500, 1000, QtCore.Qt.KeepAspectRatio) 
-        # self.image.setPixmap(pixmap)
-
-        # # A layout created within an object is set as the object's layout by default(?) --------------------------------
-        #     # setLayout is never called and this works somehow
-        #        # we pass self into the QVBoxLayout() constructor
-        # self.mainLayout = QVBoxLayout(self)
-        # hbox = QHBoxLayout()
-        # hbox.addWidget(self.image)
-
-        # self.mainLayout.addLayout(hbox)   
-
   
 class DemoScreen(QMainWindow):
     def __init__(self):
