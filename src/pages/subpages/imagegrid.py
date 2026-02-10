@@ -30,7 +30,7 @@ class ImageGrid(QWidget):
 
         # Layout contains both image grid and navigation arrows/nums
             # Navigation items fill the entire last row
-        self.layout_ = QGridLayout(self) # maybe this doesn't have to be stored, we just set layout and call using built-in layout (non underscore) ---------
+        self.layout_ = QGridLayout(self) # TODO: maybe this doesn't have to be stored, we just set layout and call using built-in layout (non underscore)
         
         # references that I would rather not have, getting child objects in Qt is somewhat awkward though...
         self.navbar_dict = {}
@@ -50,7 +50,7 @@ class ImageGrid(QWidget):
         # If db is empty then display this and ask user to add images
     # @classmethod
 
-    def new_image_grid(self, file_paths:list[str]): # ---------------------------------
+    def new_image_grid(self, file_paths:list[str]): # TODO
         # pass new value for file paths
         self.file_paths = file_paths
 
@@ -247,7 +247,7 @@ class ImageGrid(QWidget):
                 key = str(row_i)+str(col_i)
                 file_label = self.create_pixmap_label(key, file_paths[file_list_index])
 
-                self.layout_.addWidget(file_label, row_i, col_i) # move widget adding to constructor for clarity ----
+                self.layout_.addWidget(file_label, row_i, col_i) # TODO: move widget adding to constructor for clarity
                 
 
         # start from i = 0 in list
@@ -321,7 +321,7 @@ class ImageGrid(QWidget):
         self.navbar_dict['btn_rs'] = self.update_navigation_button_shift(QPushButton('>'), 1)
         naviagation_bar.addWidget(self.navbar_dict['btn_rs'])
 
-        self.layout_.addLayout(naviagation_bar, self.x_grid, 0, 1, self.y_grid) # move widget adding (to layout) to constructor for clarity, as we have references ----
+        self.layout_.addLayout(naviagation_bar, self.x_grid, 0, 1, self.y_grid) # TODO: move widget adding (to layout) to constructor for clarity, as we have references
      
     def update_navigation_button(self, btn:QPushButton, page_index:int):
         '''Function returns a QPushButton that navigates to a specified page index'''

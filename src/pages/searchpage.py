@@ -5,7 +5,7 @@ class SearchPage(QWidget):
     def __init__(self, manager:QMainWindow, switcher=QStackedWidget):
         super().__init__()
 
-        
-        # new
         self.windowManager = manager
         self.windowSwitcher = switcher
+
+        # TODO Offer means to search by images

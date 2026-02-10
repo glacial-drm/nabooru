@@ -31,7 +31,7 @@ class HomePage(QWidget): # contain all the images or contain window that contain
         self.layout_.addWidget(left_search)
         
         # Main Widget (image grid)
-            # check if filepaths is empty, queue tutorial / add files dialog -----------------------------------------------
+            # TODO: check if filepaths is empty, queue tutorial / add files dialog
         main_grid = imagegrid.ImageGrid(3, 8, 200, self.filePaths)
         self.layout_.addWidget(main_grid)
 

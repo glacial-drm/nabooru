@@ -4,7 +4,7 @@ from pymongo import MongoClient
 class FileDB:
     
     def __init__(self): # , clientUrl:str, databaseName:str, collectionName:str
-        # db and client, get user to config, config file ------------------------------------
+        # TODO: db and client, get user to config, config file
         self.client = MongoClient("mongodb://localhost:27017/")
         self.database =  self.client["imageDB"]
         self.imgCollection = self.database['images']
@@ -61,7 +61,7 @@ class FileDB:
                 match type(e).__name__:
                     case 'DuplicateKeyError':
                         # if file is already in db 
-                        # query user on which version of file they want to keep --------------------------------
+                        # TODO: query user on which version of file they want to keep
                             # and if they want to repeat their choice on other instances of same error
                         
                         # print(type(e).__name__)
@@ -73,7 +73,7 @@ class FileDB:
                     # print(e)
             
 
-            # track progress somehow on inserts -----------------------------------
+            # TODO: track progress somehow on inserts
                 # display to user
                 # we should get all files and then add to db if this is case
 
@@ -95,7 +95,7 @@ class FileDB:
                 if subdir_files_paths:
                     for file_path in subdir_files_paths: files_paths.append(file_path)
             
-            # could query the user each iteration ----------------------------------------------
+            # TODO: could query the user each iteration
                 # on whether they want to include a detected directory
                 # or make this functionality in the ui
         
