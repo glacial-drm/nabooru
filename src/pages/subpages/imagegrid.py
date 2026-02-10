@@ -10,31 +10,36 @@ class ImageGrid(QWidget):
     def __init__(self, x_grid:int, y_grid:int, img_size:int, file_paths:list[str]):
         super().__init__()
         
-        # keep in file, make function in taskbar to configure... config file?
-            # with respect to a default size imagegrid?
-
+        # could be taken from a config file
         self.x_grid = x_grid
         self.y_grid = y_grid
         self.img_size = img_size
+        self.max_var_pages = 9 # number of variable pages. Pages in navigation bar excluding the start and end pages 
+
+        # passed in constructor, or not in a default constructor
         self.file_paths = file_paths
         
+        # default constructor exclusive
+        if self.file_paths == []:
+            # Dialog that gets user to add a new file path
+            pass
+
+        # reset on a new ImageGrid instance. also appropriate in constructor
         self.current_page_index = 0
-        self.total_pages = ceil(len(file_paths) / (x_grid*y_grid))
-        
-        self.max_var_pages = 9 # number of pages in navigation bar excluding the start and end pages
+        self.total_pages = ceil(len(self.file_paths) / (self.x_grid*self.y_grid))
 
-        # QGridLayout should contain both image grid and navigation arrows/nums
-            # Navigation items should fill the entire last row_i
+        # Layout contains both image grid and navigation arrows/nums
+            # Navigation items fill the entire last row
         self.layout_ = QGridLayout(self) # maybe this doesn't have to be stored, we just set layout and call using built-in layout (non underscore) ---------
-
+        
+        # references that I would rather not have, getting child objects in Qt is somewhat awkward though...
         self.navbar_dict = {}
         self.image_dict = {}
         self.create_image_dict()
         
-        if self.file_paths == []:
-            # Dialog that gets user to add a new file path
-            pass
-        
+
+        # actual creation of UI elements:
+
         # Grid of images 8x3 (default)
         self.create_grid_images(self.file_paths)
 
@@ -44,6 +49,15 @@ class ImageGrid(QWidget):
     # overloaded constructor
         # If db is empty then display this and ask user to add images
     # @classmethod
+
+    def new_image_grid(self, file_paths:list[str]): # ---------------------------------
+        # pass new value for file paths
+        self.file_paths = file_paths
+
+        # increase / decrease image_dict
+        
+        # call create grid images and create grid navigation
+        pass
 
     def focus_image_page(self):
         # get the clicked image using get_image

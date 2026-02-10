@@ -11,7 +11,7 @@ dir = 'E:/Downloads/ref/Navia'
 dir_list = os.listdir(dir)
 
 class HomePage(QWidget): # contain all the images or contain window that contains all images
-    def __init__(self, manager:QMainWindow, switcher=QStackedWidget, filePaths = list[str]):
+    def __init__(self, manager:QMainWindow, switcher:QStackedWidget, filePaths:list[str]):
         super().__init__()
 
         
@@ -35,7 +35,10 @@ class HomePage(QWidget): # contain all the images or contain window that contain
         main_grid = imagegrid.ImageGrid(3, 8, 200, self.filePaths)
         self.layout_.addWidget(main_grid)
 
+        
+
         # self.setLayout(self.layout_) # verify how this works (as opposed to passing self into widget constructor)
+
 
   
 class DemoScreen(QMainWindow):
